@@ -2,7 +2,7 @@
 
 API para cadastro de clientes, documentos, telefones e endereços, desenvolvida com **Java 17, Spring Boot 4.1.1, Spring Data JPA, Spring HATEOAS e H2**. Esta atividade continua a ATVI: mantém os CRUDs e implementa os níveis do Richardson Maturity Model (RMM), incluindo navegação por links em respostas HAL.
 
-Este guia mantém a organização da primeira atividade: execução, rotas, exemplos e respostas. Inclui também a demonstração da ATVII e soluções para os problemas mais comuns de configuração.
+Este guia mantém a organização da primeira atividade: execução, rotas, exemplos e respostas. Inclui também um roteiro de teste da ATVII e soluções para os problemas mais comuns de configuração.
 
 ## Como executar no Windows
 
@@ -15,20 +15,18 @@ Se o JDK 17 não estiver instalado, instale um pacote **JDK 17**, por exemplo o 
 **Com Git**, abra o PowerShell na pasta em que deseja salvar o projeto:
 
 ```powershell
-git clone https://github.com/felipesgb/AV2-TPIII.git
-cd .\AV2-TPIII\automanager
+git clone https://github.com/felipesgb/AV2-WEBIII.git
+cd .\AV2-WEBIII\automanager
 ```
 
 **Sem Git**, use **Code > Download ZIP** no GitHub, extraia tudo e abra a pasta `automanager` que está dentro da pasta extraída. Não execute dentro do ZIP. No Explorador de Arquivos, abra `automanager`, digite `powershell` na barra de endereço e pressione Enter.
 
-A estrutura é esta; o nome da pasta externa pode variar no ZIP:
+A estrutura é esta; o nome da pasta externa pode variar no ZIP (por exemplo, `AV2-WEBIII-main`):
 
 ```text
-AV2-TPIII/
+AV2-WEBIII/
 ├── README.md
-├── demonstrar.ps1
 └── automanager/          <-- primeiro terminal aqui
-    ├── configurar-java.ps1
     ├── pom.xml
     ├── mvnw.cmd
     ├── mvnw
@@ -51,19 +49,7 @@ Os três `Test-Path` devem retornar **True**. Todos os comandos Maven e Java aba
 
 O caminho do JDK varia entre computadores: pode terminar em `jdk-17.0.20.1`, `jdk-17...-hotspot` ou outro nome. **Não é necessário renomear a pasta nem copiar o caminho do computador do autor.**
 
-Execute:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-. .\configurar-java.ps1
-.\mvnw.cmd -version
-```
-
-O primeiro comando permite os scripts apenas nesta janela do PowerShell. O segundo procura um **JDK 17 instalado**, confere `java.exe` e `javac.exe` e configura `JAVA_HOME` e `PATH` somente neste terminal. Ele não instala Java nem altera as configurações globais do Windows. Não é necessário executar como administrador.
-
-O último comando deve informar **Java version: 17...**. Se o script informar que não encontrou o JDK, use a configuração manual abaixo. Se uma política da instituição bloquear scripts mesmo com a opção `Process`, use também a opção manual.
-
-**Configuração manual, sem script:** localize a instalação do JDK no Explorador. Estas pastas são locais comuns:
+Localize a instalação do JDK no Explorador. Estas pastas são locais comuns:
 
 ```powershell
 Get-ChildItem "$env:ProgramFiles\Java", "$env:ProgramFiles\Eclipse Adoptium", "$env:ProgramFiles\Microsoft", "$env:ProgramFiles\Amazon Corretto" -Directory -ErrorAction SilentlyContinue | Select-Object FullName
@@ -81,7 +67,7 @@ $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 .\mvnw.cmd -version
 ```
 
-As versões devem indicar **17**. `JAVA_HOME` não deve terminar em `java.exe`, `bin` ou apontar para `Common Files\Oracle\Java\javapath`; esta última é uma pasta de atalhos, não a instalação do JDK. O `&` permite executar um caminho que contém espaços.
+As versões devem indicar **17**. `JAVA_HOME` não deve terminar em `java.exe`, `bin` ou apontar para `Common Files\Oracle\Java\javapath`; esta última é uma pasta de atalhos, não a instalação do JDK. O `&` permite executar um caminho que contém espaços. Essa configuração vale apenas para esta janela do PowerShell e não altera as configurações globais do Windows.
 
 **Se fechar este terminal, repita a configuração do Java na próxima janela antes de usar Maven.**
 
@@ -120,11 +106,11 @@ Se a porta 8080 já estiver ocupada, use 8081:
 .\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--server.port=8081"
 ```
 
-Nesse caso, use `http://localhost:8081` no navegador, na demonstração e nas requisições.
+Nesse caso, use `http://localhost:8081` no navegador e nas requisições.
 
-### 5. Demonstrar o funcionamento em um segundo terminal
+### 5. Testar a API em um segundo terminal
 
-Com o servidor rodando, abra **outro PowerShell dentro da mesma pasta `automanager`**. Esse terminal não precisa configurar Java, pois só enviará requisições HTTP.
+Com o servidor rodando, abra **outro PowerShell**. Esse terminal não precisa configurar Java, pois só enviará requisições HTTP.
 
 Confira a entrada da API:
 
@@ -132,28 +118,29 @@ Confira a entrada da API:
 Invoke-RestMethod -Uri 'http://localhost:8080/' | ConvertTo-Json -Depth 10
 ```
 
-Execute o roteiro incluído no repositório (o `..` aponta para a pasta que contém o README):
+Os comandos abaixo cadastram, consultam, atualizam com PATCH e PUT e excluem um cliente. Se usou a porta 8081, altere `$base`:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File ..\demonstrar.ps1
+$base = 'http://localhost:8080'
+
+# Cadastrar (201) e guardar o ID retornado
+$c = Invoke-RestMethod -Method Post -Uri "$base/clientes" -ContentType 'application/json' -Body '{"nome":"Ana Silva"}'
+$c.id
+
+# Consultar (a resposta traz _links)
+Invoke-RestMethod -Uri "$base/clientes/$($c.id)" | ConvertTo-Json -Depth 10
+
+# Atualizar parcialmente (PATCH)
+Invoke-RestMethod -Method Patch -Uri "$base/clientes/$($c.id)" -ContentType 'application/json' -Body '{"nomeSocial":"Ana"}'
+
+# Substituir (PUT exige os campos obrigatórios)
+Invoke-RestMethod -Method Put -Uri "$base/clientes/$($c.id)" -ContentType 'application/json' -Body '{"nome":"Ana Souza"}'
+
+# Excluir (204, sem corpo)
+Invoke-RestMethod -Method Delete -Uri "$base/clientes/$($c.id)"
 ```
 
-Se usou a porta 8081:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File ..\demonstrar.ps1 -BaseUrl http://localhost:8081
-```
-
-O roteiro descobre as URLs pelos links da API, cria os quatro tipos de registro, consulta, atualiza com PATCH e PUT, verifica a navegação de volta ao cliente e exclui os dados criados. Ele usa um número de documento único a cada execução e pode ser repetido. Não remove registros anteriores do professor.
-
-Ao final, procure:
-
-```text
-CRUD dos quatro recursos, PUT, PATCH e navegacao HATEOAS: OK.
-Dados desta demonstracao removidos em cascata.
-```
-
-A demonstração encerra após as verificações; o servidor continua rodando no primeiro terminal. Como os registros de demonstração são removidos, as listagens podem voltar a ficar vazias. Para cadastrar dados que permaneçam no banco, use os exemplos da seção **Exemplos de JSON**.
+Para testar documentos, telefones e endereços, ou cadastrar dados que permaneçam no banco, use Postman/Insomnia com os exemplos da seção **Exemplos de JSON**.
 
 ## Outras formas de executar
 
@@ -185,7 +172,7 @@ Os dados dessa execução desaparecem ao encerrar a aplicação. O banco em arqu
 2. Em **Window > Preferences > Java > Installed JREs**, configure um **JDK 17**. Confira também o JDK do projeto e da configuração de execução.
 3. Aguarde o Maven resolver as dependências. Se necessário, use **Maven > Update Project**.
 4. Execute `AutomanagerApplication` como **Java Application** ou **Spring Boot App**. Configure a pasta de trabalho da execução como `automanager` para manter o banco no mesmo local.
-5. Acesse a raiz e execute a demonstração conforme o passo 5. Pare o servidor iniciado no terminal antes de iniciar pela IDE.
+5. Acesse a raiz e teste conforme o passo 5. Pare o servidor iniciado no terminal antes de iniciar pela IDE.
 
 ### Linux/Ubuntu e macOS
 
@@ -213,9 +200,9 @@ sh mvnw clean verify
 sh mvnw spring-boot:run
 ```
 
-Usar `sh mvnw` evita depender da permissão de execução do arquivo. O servidor usa a mesma porta e as mesmas rotas. A demonstração `.ps1` exige PowerShell; se ele estiver instalado, rode `pwsh -NoProfile -File ../demonstrar.ps1` em outro terminal dentro de `automanager`. Caso contrário, use os exemplos no Postman/Insomnia; os 44 testes de `clean verify` não dependem de PowerShell.
+Usar `sh mvnw` evita depender da permissão de execução do arquivo. O servidor usa a mesma porta e as mesmas rotas. Para testar a API, use `curl` ou Postman/Insomnia com os exemplos da seção **Exemplos de JSON**; os 44 testes de `clean verify` não dependem de PowerShell.
 
-O procedimento completo desta entrega foi validado em **Windows com JDK 17 e Windows PowerShell 5.1**. Os comandos Linux/macOS são alternativas de execução; não foram testados nesses sistemas nesta validação.
+Os comandos Linux/macOS são alternativas de execução.
 
 ## Erros comuns e como resolver
 
@@ -224,17 +211,16 @@ O procedimento completo desta entrega foi validado em **Windows com JDK 17 e Win
 | `JAVA_HOME not found` ou `JAVA_HOME is set to an invalid directory` | Repita o passo 2 na mesma janela que executará Maven. Confira a pasta real do JDK, sem `bin` no final. |
 | `java` funciona, mas Maven usa outra versão | Execute `.\mvnw.cmd -version`. Maven usa `JAVA_HOME`; configure o JDK 17 no passo 2, mesmo que `java -version` funcione. |
 | `javac.exe` não existe ou `No compiler is provided` | A instalação é apenas JRE ou o caminho está errado. Use um **JDK 17** com `bin\javac.exe`. |
-| Script bloqueado por política de execução | Use `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` nesta janela. Se houver política institucional, configure Java manualmente e execute os testes Maven sem o script. |
 | `mvnw.cmd` não é reconhecido | Use `.\mvnw.cmd`, com ponto e barra, dentro de `automanager`. |
 | `no POM`, `.mvn` ausente ou `MavenWrapperMain` não encontrado | Extraia/baixe o projeto inteiro, incluindo `.mvn/wrapper`, e confira os três `Test-Path` do passo 1. Não copie somente `src` e não invoque o wrapper de outra pasta. |
 | `release version 17 not supported`, versão de classe incompatível ou erro de Lombok/compilador | Confira `.\mvnw.cmd -version` e o JDK da IDE; use o **JDK 17** validado para esta entrega e execute `clean verify` novamente. |
 | Download de dependências falha (`Could not transfer artifact`, timeout, `PKIX`) | Confira acesso à internet e a `https://repo.maven.apache.org`, data/hora do computador e proxy/certificados da instituição. Após resolver a rede, execute `.\mvnw.cmd -U clean verify`. Não desative a validação TLS. |
-| `Port 8080 was already in use` | Pare a outra execução com Ctrl+C ou use 8081 conforme o passo 4; ajuste também a URL da demonstração. |
+| `Port 8080 was already in use` | Pare a outra execução com Ctrl+C ou use 8081 conforme o passo 4; ajuste também a URL das requisições. |
 | `Database may be already in use` / banco bloqueado | Pare as outras instâncias que usam esse projeto. Mudar apenas a porta não libera o banco em arquivo; para uma execução independente, use a opção de banco em memória. |
 | Banco antigo com esquema incompatível | Para avaliar sem alterar os dados antigos, pare o servidor e use o JAR com H2 em memória, conforme a seção de banco. |
 | `Unable to access jarfile` | Execute `clean verify`, confira o `BUILD SUCCESS` e rode o comando do JAR dentro de `automanager`. |
-| Conexão recusada na demonstração/navegador | Aguarde `Started AutomanagerApplication`, mantenha o primeiro terminal aberto e confira se a porta do servidor e a URL são iguais. |
-| Resposta vazia, só `_links` ou ausência de `_embedded` | Pode ser uma coleção sem registros. Execute a demonstração; ela cria e depois remove seus próprios dados. |
+| Conexão recusada no navegador ou cliente HTTP | Aguarde `Started AutomanagerApplication`, mantenha o primeiro terminal aberto e confira se a porta do servidor e a URL são iguais. |
+| Resposta vazia, só `_links` ou ausência de `_embedded` | Pode ser uma coleção sem registros. Cadastre um registro (passo 5) e consulte de novo. |
 | `400 Bad Request` | Confira campos obrigatórios, tipos, datas `yyyy-MM-dd` e IDs. PUT exige os dados completos; para alterar só um campo, use PATCH. |
 | `404 Not Found` | Use os IDs/links retornados pela API; não presuma que o primeiro ID é sempre 1. Um registro excluído retorna 404. |
 | `409 Conflict` | Use outro número de documento. Se o cliente já tem endereço, atualize o existente em vez de cadastrar outro. |
@@ -243,36 +229,50 @@ O procedimento completo desta entrega foi validado em **Windows com JDK 17 e Win
 Se `clean verify` falhar, os detalhes ficam em `automanager/target/surefire-reports`. Diferencie **avisos dos cenários negativos** de uma falha real no resumo final. Não use `-DskipTests` para validar a entrega.
 
 
+## Organização do código
+
+```text
+com.autobots.automanager
+├── controles      # endpoints REST, entrada da API (InicioControle), rotas originais (RotasLegadasControle) e TratadorErros
+├── servicos       # regras de negócio e validações
+├── repositorios   # acesso a dados (Spring Data JPA)
+├── entidades      # Cliente, Documento, Endereco e Telefone
+├── dto            # objetos de entrada e de saída (HATEOAS) e conversor
+└── modelo         # atualizadores, substituidor de cliente e Hipermidia (montagem dos links)
+```
+
+Os testes ficam em `automanager/src/test`: `CrudApiTests` (CRUDs, validações e conflitos), `HipermidiaApiTests` (links HATEOAS), `AtualizadoresTests` e `AutomanagerApplicationTests`.
+
 ## Rotas
 
 URL base: **`http://localhost:8080`**. Envie JSON com `Content-Type: application/json`.
 
-| Método | Rota | Operação |
-|---|---|---|
-| GET | `/clientes` | Listar clientes |
-| GET | `/clientes/{id}` | Consultar cliente |
-| POST | `/clientes` | Cadastrar cliente e, opcionalmente, seus dados associados |
-| PUT | `/clientes/{id}` | Substituir os dados editáveis do cliente |
-| PATCH | `/clientes/{id}` | Atualizar parcialmente o cliente |
-| DELETE | `/clientes/{id}` | Excluir cliente e seus dados associados |
-| GET | `/documentos` | Listar documentos |
-| GET | `/documentos/{id}` | Consultar documento |
-| POST | `/documentos?clienteId={clienteId}` | Cadastrar documento no cliente |
-| PUT | `/documentos/{id}` | Substituir os dados editáveis do documento |
-| PATCH | `/documentos/{id}` | Atualizar parcialmente o documento |
-| DELETE | `/documentos/{id}` | Excluir documento |
-| GET | `/telefones` | Listar telefones |
-| GET | `/telefones/{id}` | Consultar telefone |
-| POST | `/telefones?clienteId={clienteId}` | Cadastrar telefone no cliente |
-| PUT | `/telefones/{id}` | Substituir os dados editáveis do telefone |
-| PATCH | `/telefones/{id}` | Atualizar parcialmente o telefone |
-| DELETE | `/telefones/{id}` | Excluir telefone |
-| GET | `/enderecos` | Listar endereços |
-| GET | `/enderecos/{id}` | Consultar endereço |
-| POST | `/enderecos?clienteId={clienteId}` | Cadastrar endereço no cliente |
-| PUT | `/enderecos/{id}` | Substituir os dados editáveis do endereço |
-| PATCH | `/enderecos/{id}` | Atualizar parcialmente o endereço |
-| DELETE | `/enderecos/{id}` | Excluir endereço |
+| Método | Rota | Operação | Status |
+|---|---|---|---|
+| GET | `/clientes` | Listar clientes | `200` |
+| GET | `/clientes/{id}` | Consultar cliente | `200` |
+| POST | `/clientes` | Cadastrar cliente e, opcionalmente, seus dados associados | `201` |
+| PUT | `/clientes/{id}` | Substituir os dados editáveis do cliente | `200` |
+| PATCH | `/clientes/{id}` | Atualizar parcialmente o cliente | `200` |
+| DELETE | `/clientes/{id}` | Excluir cliente e seus dados associados | `204` |
+| GET | `/documentos` | Listar documentos | `200` |
+| GET | `/documentos/{id}` | Consultar documento | `200` |
+| POST | `/documentos?clienteId={clienteId}` | Cadastrar documento no cliente | `201` |
+| PUT | `/documentos/{id}` | Substituir os dados editáveis do documento | `200` |
+| PATCH | `/documentos/{id}` | Atualizar parcialmente o documento | `200` |
+| DELETE | `/documentos/{id}` | Excluir documento | `204` |
+| GET | `/telefones` | Listar telefones | `200` |
+| GET | `/telefones/{id}` | Consultar telefone | `200` |
+| POST | `/telefones?clienteId={clienteId}` | Cadastrar telefone no cliente | `201` |
+| PUT | `/telefones/{id}` | Substituir os dados editáveis do telefone | `200` |
+| PATCH | `/telefones/{id}` | Atualizar parcialmente o telefone | `200` |
+| DELETE | `/telefones/{id}` | Excluir telefone | `204` |
+| GET | `/enderecos` | Listar endereços | `200` |
+| GET | `/enderecos/{id}` | Consultar endereço | `200` |
+| POST | `/enderecos?clienteId={clienteId}` | Cadastrar endereço no cliente | `201` |
+| PUT | `/enderecos/{id}` | Substituir os dados editáveis do endereço | `200` |
+| PATCH | `/enderecos/{id}` | Atualizar parcialmente o endereço | `200` |
+| DELETE | `/enderecos/{id}` | Excluir endereço | `204` |
 
 Use os IDs retornados pela API. Nos cadastros de documento, telefone e endereço, `clienteId` é opcional: sem ele, o registro é criado sem vínculo com cliente. As rotas originais `/cliente/cadastro`, `/cliente/clientes`, `/cliente/cliente/{id}`, `/cliente/atualizar` e `/cliente/excluir` também continuam disponíveis; nas duas últimas, envie `id` no corpo. O PUT legado `/cliente/atualizar` mantém a atualização parcial; para novas integrações, use PATCH nas rotas plurais.
 
@@ -341,6 +341,17 @@ Cada cliente pode ter **um endereço**. Se já existir, use PATCH para atualizar
 
 São obrigatórios: nome do cliente; tipo e número do documento; DDD e número do telefone; cidade, rua e número do endereço. O número do documento deve ser único.
 
+## Formas de cadastro
+
+**Tudo de uma vez** — envie cliente, documentos, endereço e telefones juntos em `POST /clientes`.
+
+**Passo a passo** (útil para testes):
+
+1. `POST /clientes` apenas com os dados básicos (`nome`).
+2. `POST /documentos?clienteId={clienteId}` para cada documento.
+3. `POST /enderecos?clienteId={clienteId}` para o endereço (`409` se o cliente já tiver um).
+4. `POST /telefones?clienteId={clienteId}` para cada telefone.
+
 ## Respostas
 
 - **200**: consulta ou atualização realizada.
@@ -349,6 +360,23 @@ São obrigatórios: nome do cliente; tipo e número do documento; DDD e número 
 - **400**: dados inválidos ou IDs incompatíveis.
 - **404**: registro ou cliente não encontrado.
 - **409**: conflito, como documento duplicado ou segundo endereço para o mesmo cliente.
+
+## Validações e erros
+
+Campos obrigatórios são checados automaticamente (por exemplo, `nome` do cliente e `tipo`/`numero` do documento). Os erros voltam em JSON com `status` e `mensagem`:
+
+```json
+{"status": 404, "mensagem": "Cliente nao encontrado"}
+```
+
+| Situação | Status HTTP |
+|---|---|
+| Campo obrigatório ausente, JSON/data/parâmetro inválido, ID informado no cadastro, ID do corpo diferente da URL ou item que não pertence ao cliente | `400` |
+| Registro ou cliente não encontrado | `404` |
+| Documento duplicado ou cliente que já possui endereço | `409` |
+| Método HTTP não suportado na rota | `405` |
+| `Accept` não suportado | `406` |
+| `Content-Type` diferente de `application/json` | `415` |
 
 ## O que esta continuação entrega
 
@@ -424,5 +452,3 @@ Content-Type: application/json
 
 {"nome":"Ana Souza","nomeSocial":"Ana","dataNascimento":"2000-05-15","documentos":[],"telefones":[],"endereco":null}
 ```
-
-
