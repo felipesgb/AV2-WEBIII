@@ -1,0 +1,21 @@
+VERIFICACAO DA ATVII - 18/10/2026
+
+Comando: mvnw.cmd clean verify
+Java: JDK 17.0.20.1
+Spring Boot: 4.1.1
+Resultado: BUILD SUCCESS
+
+com.autobots.automanager.AtualizadoresTests: 3 testes, 0 falhas, 0 erros, 0 ignorados
+com.autobots.automanager.AutomanagerApplicationTests: 1 testes, 0 falhas, 0 erros, 0 ignorados
+com.autobots.automanager.CrudApiTests: 19 testes, 0 falhas, 0 erros, 0 ignorados
+com.autobots.automanager.HipermidiaApiTests: 21 testes, 0 falhas, 0 erros, 0 ignorados
+
+TOTAL: 44 testes; 0 falhas; 0 erros; 0 ignorados.
+
+Verificacao adicional:
+JAR iniciado em servidor HTTP local na porta 18080 com H2 em memoria.
+demonstrar.ps1 executado com sucesso: navegacao por links nos dois sentidos, cadastro e consulta dos quatro recursos, PATCH e exclusao em cascata.
+
+Pacote: fontes, Maven Wrapper, testes, instrucoes e demonstracao.
+Nao inclui banco de dados, historico Git ou dependencias compiladas.
+O JAR e gerado pelo comando clean verify.
