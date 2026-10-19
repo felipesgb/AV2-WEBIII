@@ -1,4 +1,4 @@
-# AV2-TPIII - AutoBots (ATVII)
+# AV2-WEBIII - AutoBots
 
 API para cadastro de clientes, documentos, telefones e endereços, desenvolvida com **Java 17, Spring Boot 4.1.1, Spring Data JPA, Spring HATEOAS e H2**. Esta atividade continua a ATVI: mantém os CRUDs e implementa os níveis do Richardson Maturity Model (RMM), incluindo navegação por links em respostas HAL.
 
