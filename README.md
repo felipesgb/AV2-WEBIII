@@ -1,8 +1,8 @@
-# AV2-WEBIII - AutoBots
+# AV3-WEBIII - AutoBots
 
-API para cadastro de clientes, documentos, telefones e endereços, desenvolvida com **Java 17, Spring Boot 4.1.1, Spring Data JPA, Spring HATEOAS e H2**. Esta atividade continua a ATVI: mantém os CRUDs e implementa os níveis do Richardson Maturity Model (RMM), incluindo navegação por links em respostas HAL.
+API para cadastro de empresas, usuários, veículos, mercadorias, serviços, vendas e credenciais, desenvolvida com **Java 17, Spring Boot 4.1.1, Spring Data JPA, Spring HATEOAS e H2**. Esta atividade continua a AV2: mantém os cadastros de clientes, documentos, telefones e endereços e os links HATEOAS.
 
-Este guia mantém a organização da primeira atividade: execução, rotas, exemplos e respostas. Inclui também um roteiro de teste da ATVII e soluções para os problemas mais comuns de configuração.
+Este guia mantém a organização da AV2: execução, rotas, exemplos, respostas e soluções para os problemas mais comuns de configuração.
 
 ## Como executar no Windows
 
@@ -12,19 +12,12 @@ Requisitos: **JDK 17** (inclui `java` e `javac`), PowerShell e conexão à inter
 
 Se o JDK 17 não estiver instalado, instale um pacote **JDK 17**, por exemplo o [Eclipse Temurin 17](https://adoptium.net/temurin/releases/?version=17), escolhendo o sistema e a arquitetura do computador. Reabra o PowerShell após a instalação. Somente o JRE não é suficiente para compilar.
 
-**Com Git**, abra o PowerShell na pasta em que deseja salvar o projeto:
+Extraia o ZIP da AV3 e abra a pasta `automanager`, onde estão `pom.xml` e `mvnw.cmd`. No Explorador de Arquivos, abra essa pasta, digite `powershell` na barra de endereço e pressione Enter. Não execute dentro do ZIP.
 
-```powershell
-git clone https://github.com/felipesgb/AV2-WEBIII.git
-cd .\AV2-WEBIII\automanager
-```
-
-**Sem Git**, use **Code > Download ZIP** no GitHub, extraia tudo e abra a pasta `automanager` que está dentro da pasta extraída. Não execute dentro do ZIP. No Explorador de Arquivos, abra `automanager`, digite `powershell` na barra de endereço e pressione Enter.
-
-A estrutura é esta; o nome da pasta externa pode variar no ZIP (por exemplo, `AV2-WEBIII-main`):
+A estrutura é esta; o nome da pasta externa pode variar no ZIP (por exemplo, `AV3-WEBIII-main`):
 
 ```text
-AV2-WEBIII/
+AV3-WEBIII/
 ├── README.md
 └── automanager/          <-- primeiro terminal aqui
     ├── pom.xml
@@ -80,11 +73,11 @@ As versões devem indicar **17**. `JAVA_HOME` não deve terminar em `java.exe`, 
 Na primeira execução, aguarde o download do Maven e das dependências. O resultado esperado é:
 
 ```text
-Tests run: 44, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 62, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
-Os testes cobrem CRUDs, validações, conflitos, transações, links HATEOAS, vínculos com clientes, rotas antigas e diferenças entre PUT e PATCH. Usam **H2 em memória**, sem alterar o banco da execução normal.
+Os testes cobrem os CRUDs da AV2 e da AV3, validações, conflitos, transações, links HATEOAS, vínculos entre empresas, usuários, veículos e vendas, rotas antigas e diferenças entre PUT e PATCH. Usam **H2 em memória**, sem alterar o banco da execução normal.
 
 Alguns testes provocam duplicidade e requisições inválidas de propósito: avisos de SQL/HTTP durante eles são esperados. A confirmação de sucesso é o resumo final acima. Não prossiga se houver `BUILD FAILURE`; consulte a seção de erros.
 
@@ -96,7 +89,7 @@ No mesmo terminal, ainda em `automanager`:
 .\mvnw.cmd spring-boot:run
 ```
 
-Aguarde **`Started AutomanagerApplication`**. Abra [http://localhost:8080/](http://localhost:8080/) no navegador. Deve aparecer JSON com `_links` para `clientes`, `documentos`, `telefones` e `enderecos`. Esta entrega é uma API; a página inicial é JSON, não uma interface gráfica.
+Aguarde **`Started AutomanagerApplication`**. Abra [http://localhost:8080/](http://localhost:8080/) no navegador. Deve aparecer JSON com `_links` para os cadastros da AV2 e os novos recursos da AV3. Esta entrega é uma API; a página inicial é JSON, não uma interface gráfica.
 
 Mantenha esse terminal aberto enquanto usa a API. Para parar, pressione **Ctrl+C**. Não inicie outra cópia na mesma porta ou usando o mesmo arquivo de banco.
 
@@ -378,9 +371,9 @@ Campos obrigatórios são checados automaticamente (por exemplo, `nome` do clien
 | `Accept` não suportado | `406` |
 | `Content-Type` diferente de `application/json` | `415` |
 
-## O que esta continuação entrega
+## Níveis de maturidade e HATEOAS
 
-O enunciado da ATVII parte dos CRUDs concluídos na ATVI e solicita a implementação dos níveis RMM. O projeto do professor inicia a adição de links para clientes. Esta entrega estende a ideia aos quatro recursos e mantém a estrutura Java/Spring da primeira atividade.
+Os níveis RMM implementados na AV2 foram preservados e os novos recursos da AV3 também oferecem links HATEOAS.
 
 | Nível | Evidência no projeto |
 |---|---|
@@ -435,9 +428,9 @@ Coleções vazias continuam oferecendo `_links`; o consumidor deve aceitar a aus
 | `endereco` | GET do endereço atual do cliente |
 | `cliente` | GET do cliente proprietário do documento, telefone ou endereço; ausente em registros avulsos |
 
-HAL não inclui o método HTTP em cada link: a tabela acima define a semântica das relações desta API. Não foi usado HAL-FORMS. Links são construídos com `linkTo(methodOn(...))`, a partir dos métodos dos controllers e do contexto da requisição, sem escrever as rotas novamente no montador nem fixar `localhost` no código. Cada documento, telefone e endereço retornado dentro de um cliente também possui seu próprio `self`.
+HAL não inclui o método HTTP em cada link: a tabela acima define a semântica das relações desta API. Não foi usado HAL-FORMS. Os links dos recursos da AV2 usam `linkTo(methodOn(...))`; os novos recursos usam o contexto da requisição, sem fixar `localhost` no código. Cada documento, telefone e endereço retornado dentro de um cliente também possui seu próprio `self`.
 
-### Diferença entre PUT e PATCH
+### Diferença entre PUT e PATCH nos recursos da AV2
 
 - **PATCH** preserva campos omitidos/nulos e faz a atualização parcial herdada da ATVI. Para remover um filho, use DELETE; uma coleção vazia no PATCH não apaga os registros.
 - **PUT** exige os campos obrigatórios e substitui os campos editáveis. Opcionais omitidos são limpos. No cliente, listas omitidas ou vazias removem os filhos correspondentes; endereço omitido remove o endereço. `id` e `dataCadastro` do cliente são preservados. Não use PUT com apenas um campo se quiser preservar os demais.
@@ -452,3 +445,34 @@ Content-Type: application/json
 
 {"nome":"Ana Souza","nomeSocial":"Ana","dataNascimento":"2000-05-15","documentos":[],"telefones":[],"endereco":null}
 ```
+
+
+## Cadastros da AV3
+
+Todos os recursos abaixo oferecem GET e POST na coleção e GET, PUT, PATCH e DELETE em `/{recurso}/{id}`. Envie JSON, use os IDs retornados pela API e cadastre os registros relacionados antes de referenciá-los.
+
+| Recurso | Campos do cadastro |
+|---|---|
+| `/empresas` | `razaoSocial`; opcionais `nomeFantasia`, `enderecoId`, `telefonesIds` |
+| `/usuarios` | `nome`, `perfis`, `empresaId`; opcionais `nomeSocial`, `enderecoId`, `telefonesIds`, `documentosIds` |
+| `/veiculos` | `tipo`, `modelo`, `placa`, `proprietarioId` |
+| `/mercadorias` | `nome`, `valor`, `quantidade`, `fabricacao`, `validade`, `empresaId`; opcionais `descricao`, `fornecedorId` |
+| `/servicos` | `nome`, `valor`, `empresaId`; opcional `descricao` |
+| `/vendas` | `identificacao`, `empresaId`, `clienteId`, `funcionarioId`, `mercadoriasIds` e/ou `servicosIds`; opcional `veiculoId` |
+| `/emails` | `endereco`, `usuarioId` |
+| `/credenciais-senha` | `nomeUsuario`, `senha`, `usuarioId` |
+| `/credenciais-codigo` | `codigo`, `usuarioId` |
+
+Perfis: `CLIENTE`, `FUNCIONARIO`, `FORNECEDOR`. Tipos de veículo: `HATCH`, `SEDA`, `SUV`, `PICKUP`, `SW`. Placas: `ABC1234` ou `ABC1D23`. Datas: `yyyy-MM-dd`. Os campos `cadastro` e `criacao` assumem a data atual quando omitidos. Credenciais também aceitam `ultimoAcesso` e `inativo` (padrão `false`). Senhas não são devolvidas nas respostas. Esta etapa cadastra credenciais; ainda não implementa login.
+
+Uma venda deve ter ao menos uma mercadoria ou serviço. Cliente e funcionário precisam dos respectivos perfis e devem pertencer à empresa da venda, assim como os itens vendidos. O veículo, quando informado, deve pertencer ao cliente. O cliente da venda é um `/usuarios` com perfil `CLIENTE`; `/clientes` preserva o cadastro legado da AV2.
+
+Nas novas rotas, PATCH preserva campos omitidos/nulos; listas enviadas substituem os vínculos, e `[]` os limpa. PUT substitui os campos editáveis e exige novamente os obrigatórios. Listagens aceitam filtros pelos IDs das referências, por exemplo `/usuarios?empresaId=1` e `/veiculos?proprietarioId=2`. Uma exclusão impedida por vínculos responde 409.
+
+Para demonstrar o fluxo completo, mantenha o servidor rodando e execute, em outro PowerShell na pasta principal do projeto:
+
+```powershell
+.\DEMONSTRAR.ps1
+```
+
+O roteiro grava uma empresa e seus cadastros, incluindo uma venda. Para outra porta: `.\DEMONSTRAR.ps1 -Base http://localhost:8081`. Como alternativa, importe `AV3.postman_collection.json` no Postman e execute as requisições em ordem.

@@ -12,4 +12,5 @@ public class DocumentoSaida extends RepresentationModel<DocumentoSaida> {
     private Long id;
     private String tipo;
     private String numero;
+    private java.time.LocalDate dataEmissao;
 }

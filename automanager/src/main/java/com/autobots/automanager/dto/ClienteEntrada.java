@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class ClienteEntrada {
     private Long id;

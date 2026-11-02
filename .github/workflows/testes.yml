@@ -1,0 +1,23 @@
+name: Testes Java
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: automanager
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: automanager/pom.xml
+      - name: Compilar e executar testes
+        run: bash mvnw --batch-mode --no-transfer-progress clean verify

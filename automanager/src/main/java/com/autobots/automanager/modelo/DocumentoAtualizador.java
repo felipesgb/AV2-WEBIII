@@ -7,6 +7,7 @@ import com.autobots.automanager.entidades.Documento;
 public class DocumentoAtualizador {
     public void atualizar(Documento documento, Documento atualizacao) {
         if (atualizacao == null) return;
+        if (atualizacao.getDataEmissao() != null) documento.setDataEmissao(atualizacao.getDataEmissao());
         if (atualizacao.getTipo() != null) { documento.setTipo(atualizacao.getTipo()); }
         if (atualizacao.getNumero() != null) { documento.setNumero(atualizacao.getNumero()); }
     }

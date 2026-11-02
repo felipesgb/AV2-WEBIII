@@ -37,6 +37,7 @@ public final class ConversorDto {
         Documento entidade = new Documento();
         entidade.setId(dados.getId());
         entidade.setTipo(dados.getTipo());
+        entidade.setDataEmissao(dados.getDataEmissao());
         entidade.setNumero(dados.getNumero());
         return entidade;
     }
@@ -45,6 +46,7 @@ public final class ConversorDto {
         DocumentoSaida dados = new DocumentoSaida();
         dados.setId(entidade.getId());
         dados.setTipo(entidade.getTipo());
+        dados.setDataEmissao(entidade.getDataEmissao());
         dados.setNumero(entidade.getNumero());
         return dados;
     }

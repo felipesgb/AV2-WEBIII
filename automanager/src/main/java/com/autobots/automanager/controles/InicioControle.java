@@ -11,7 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class InicioControle {
     @GetMapping("/")
     public RepresentationModel<?> inicio() {
-        return new RepresentationModel<>().add(
+        var inicio = new RepresentationModel<>();
+        for (String rota : java.util.List.of("empresas","usuarios","veiculos","mercadorias","servicos","vendas","emails","credenciais-senha","credenciais-codigo")) {
+            inicio.add(org.springframework.hateoas.Link.of(org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath().path("/"+rota).build().toUriString()).withRel(rota));
+        }
+        return inicio.add(
             linkTo(methodOn(InicioControle.class).inicio()).withSelfRel(),
             linkTo(methodOn(ClienteControle.class).listar()).withRel("clientes"),
             linkTo(methodOn(DocumentoControle.class).listar()).withRel("documentos"),

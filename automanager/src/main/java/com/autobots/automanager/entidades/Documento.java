@@ -23,4 +23,5 @@ public class Documento {
 	@Column(unique = true)
 	@NotBlank(message = "numero e obrigatorio")
 	private String numero;
+    private java.time.LocalDate dataEmissao;
 }

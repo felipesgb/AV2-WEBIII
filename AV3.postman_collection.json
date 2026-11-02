@@ -1,0 +1,352 @@
+{
+  "info": {
+    "name": "AV3 AutoManager — fluxo completo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.info.requestName === \"Empresa\") { pm.collectionVariables.set(\"sufixo\", Date.now().toString()); pm.collectionVariables.set(\"codigo\", Date.now()); }",
+          "if (pm.info.requestName === \"Empresa\") { pm.collectionVariables.set(\"placa\", Array.from({length:3}, () => String.fromCharCode(65 + Math.floor(Math.random()*26))).join(\"\") + Math.floor(1000 + Math.random()*9000)); }"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Empresa",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/empresas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"razaoSocial\": \"AutoBots Demonstração\",\n  \"nomeFantasia\": \"Oficina AV3\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"empresaId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cliente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Ana\",\n  \"perfis\": [\n    \"CLIENTE\"\n  ],\n  \"empresaId\": {{empresaId}}\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"clienteId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Funcionário",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Bia\",\n  \"perfis\": [\n    \"FUNCIONARIO\"\n  ],\n  \"empresaId\": {{empresaId}}\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"funcionarioId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fornecedor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Peças Ltda\",\n  \"perfis\": [\n    \"FORNECEDOR\"\n  ],\n  \"empresaId\": {{empresaId}}\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"fornecedorId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Veículo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/veiculos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelo\": \"Gol\",\n  \"placa\": \"{{placa}}\",\n  \"tipo\": \"HATCH\",\n  \"proprietarioId\": {{clienteId}}\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"veiculoId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mercadoria",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/mercadorias",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Filtro\",\n  \"valor\": 30.5,\n  \"quantidade\": 10,\n  \"fabricacao\": \"2026-01-01\",\n  \"validade\": \"2030-01-01\",\n  \"empresaId\": {{empresaId}},\n  \"fornecedorId\": {{fornecedorId}}\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"mercadoriaId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Serviço",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/servicos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Troca de filtro\",\n  \"valor\": 50,\n  \"empresaId\": {{empresaId}}\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"servicoId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E-mail",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/emails",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"endereco\": \"ana@example.com\",\n  \"usuarioId\": {{clienteId}}\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"emailId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Credencial senha",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/credenciais-senha",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nomeUsuario\": \"ana-{{sufixo}}\",\n  \"senha\": \"ExemploAV3!\",\n  \"usuarioId\": {{clienteId}}\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"credencialId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Credencial código",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/credenciais-codigo",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": {{codigo}},\n  \"usuarioId\": {{clienteId}}\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"codigoId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Venda",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/vendas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"identificacao\": \"VENDA-{{sufixo}}\",\n  \"empresaId\": {{empresaId}},\n  \"clienteId\": {{clienteId}},\n  \"funcionarioId\": {{funcionarioId}},\n  \"veiculoId\": {{veiculoId}},\n  \"mercadoriasIds\": [\n    {{mercadoriaId}}\n  ],\n  \"servicosIds\": [\n    {{servicoId}}\n  ]\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Criado\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"vendaId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consultar venda e links",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/vendas/{{vendaId}}"
+      }
+    }
+  ]
+}

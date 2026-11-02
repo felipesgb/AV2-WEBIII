@@ -1,0 +1,1 @@
+package com.autobots.automanager.base; public enum TipoVeiculo { HATCH, SEDA, SUV, PICKUP, SW }

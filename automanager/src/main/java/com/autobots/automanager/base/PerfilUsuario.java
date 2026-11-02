@@ -1,0 +1,1 @@
+package com.autobots.automanager.base; public enum PerfilUsuario { CLIENTE, FUNCIONARIO, FORNECEDOR }
